@@ -29,6 +29,7 @@ namespace GTA_GXT_Editor.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GXTEntryEditor));
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.txtBoxValue = new System.Windows.Forms.TextBox();
@@ -122,6 +123,7 @@ namespace GTA_GXT_Editor.Forms
             this.Controls.Add(this.txtBoxName);
             this.Controls.Add(this.btnProcessEntry);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GXTEntryEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "GXTEntryEditor";

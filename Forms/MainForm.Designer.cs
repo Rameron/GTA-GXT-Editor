@@ -29,6 +29,7 @@ namespace GTA_GXT_Editor.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.btnDeleteEntry = new System.Windows.Forms.Button();
@@ -295,6 +296,7 @@ namespace GTA_GXT_Editor.Forms
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnSaveChanges);
             this.Controls.Add(this.groupBox1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "GTA GXT Editor";
             this.Load += new System.EventHandler(this.MainForm_Load);
