@@ -1,11 +1,15 @@
 ﻿using GTA_GXT_Editor.Common;
+using GTA_GXT_Editor.Utils;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace GTA_GXT_Editor.Contracts
 {
     public abstract class CommonGXTManager
     {
+        public abstract string CyryllicCharsDictionaryPath { get; set; }
+
         public abstract Dictionary<int[], char> CyryllicCharsDictionary { get; set; }
 
         public abstract List<GXTBase> GXTEntries { get; }
@@ -66,6 +70,11 @@ namespace GTA_GXT_Editor.Contracts
             targetBytes.Add(0);
 
             return targetBytes.ToArray();
+        }
+    
+        public void ReloadCyryllicCharsDictionary()
+        {
+            CyryllicCharsDictionary = CyryllicCharsDictionaryPath.LoadCyryllicCharsDictionary();
         }
     }
 }

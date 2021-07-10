@@ -51,6 +51,7 @@ namespace GTA_GXT_Editor.Forms
             this.btnSelectGxtFilePath = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.btnAddMissingEntries = new System.Windows.Forms.Button();
+            this.btnConvertToOtherDict = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -284,11 +285,24 @@ namespace GTA_GXT_Editor.Forms
             this.btnAddMissingEntries.UseVisualStyleBackColor = true;
             this.btnAddMissingEntries.Click += new System.EventHandler(this.btnAddMissingEntries_Click);
             // 
+            // btnConvertToOtherDict
+            // 
+            this.btnConvertToOtherDict.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnConvertToOtherDict.Enabled = false;
+            this.btnConvertToOtherDict.Location = new System.Drawing.Point(360, 599);
+            this.btnConvertToOtherDict.Name = "btnConvertToOtherDict";
+            this.btnConvertToOtherDict.Size = new System.Drawing.Size(168, 38);
+            this.btnConvertToOtherDict.TabIndex = 11;
+            this.btnConvertToOtherDict.Text = "Конвертировать, используя другой словарь";
+            this.btnConvertToOtherDict.UseVisualStyleBackColor = true;
+            this.btnConvertToOtherDict.Click += new System.EventHandler(this.btnConvertToOtherDict_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(968, 649);
+            this.Controls.Add(this.btnConvertToOtherDict);
             this.Controls.Add(this.btnAddMissingEntries);
             this.Controls.Add(this.btnSelectGxtFilePath);
             this.Controls.Add(this.txtBoxGxtFilePath);
@@ -332,6 +346,7 @@ namespace GTA_GXT_Editor.Forms
         private System.Windows.Forms.Button btnDeleteEntry;
         private System.Windows.Forms.CheckBox chkLoopSearch;
         private System.Windows.Forms.Button btnAddMissingEntries;
+        private System.Windows.Forms.Button btnConvertToOtherDict;
     }
 }
 

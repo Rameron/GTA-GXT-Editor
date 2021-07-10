@@ -19,13 +19,23 @@ namespace GTA_GXT_Editor.GTAIII
         private List<GXTBase> _gxtEntries;
         private Dictionary<int[], char> _cyryllicCharsDictionary;
 
+        public override string CyryllicCharsDictionaryPath { get; set; }
         public override List<GXTBase> GXTEntries { get => _gxtEntries; }
         public override Dictionary<int[], char> CyryllicCharsDictionary { get => _cyryllicCharsDictionary; set => _cyryllicCharsDictionary = value; }
 
-        public GXTManager(string gxtPath)
+        public GXTManager(string gxtPath, string dictionaryPath = null)
         {
             _gxtPath = gxtPath;
-            _cyryllicCharsDictionary = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), RUSSIAN_CHARS_FILENAME).LoadCyryllicCharsDictionary();
+            CyryllicCharsDictionaryPath = dictionaryPath;
+
+            if (CyryllicCharsDictionaryPath == null)
+            {
+                _cyryllicCharsDictionary = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), RUSSIAN_CHARS_FILENAME).LoadCyryllicCharsDictionary();
+            }
+            else
+            {
+                _cyryllicCharsDictionary = CyryllicCharsDictionaryPath.LoadCyryllicCharsDictionary();
+            }           
             _gxtEntries = ReadGXTFile(gxtPath);
         }
 
@@ -144,6 +154,4 @@ namespace GTA_GXT_Editor.GTAIII
             }
         }
     }
-
-
 }

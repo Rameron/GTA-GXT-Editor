@@ -59,6 +59,7 @@ namespace GTA_GXT_Editor.Forms
             btnDeleteEntry.Enabled = false;
             btnAddMissingEntries.Enabled = false;
             btnSaveChanges.Enabled = false;
+            btnConvertToOtherDict.Enabled = false;
 
             lstKeys.Items.Clear();
 
@@ -70,15 +71,22 @@ namespace GTA_GXT_Editor.Forms
                 {
                     var gtxType = DetectGxtType(txtBoxGxtFilePath.Text);
 
+                    string charDictionaryPath = null;
+                    var dialogResult = MessageBox.Show(this, "Использовать встроенный словарь символов?", "Словарь символов", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (dialogResult == DialogResult.No)
+                    {
+                        charDictionaryPath = RequestCharsDictionary();
+                    }
+
                     if (gtxType == GXTType.GTA_III)
                     {
-                        gxtManager = new GTAIII.GXTManager(txtBoxGxtFilePath.Text);
+                        gxtManager = new GTAIII.GXTManager(txtBoxGxtFilePath.Text, charDictionaryPath);
                         _loadedGxtType = gtxType;
                         return true;
                     }
                     else if (gtxType == GXTType.GTA_VC)
                     {
-                        gxtManager = new GTAVC.GXTManager(txtBoxGxtFilePath.Text);
+                        gxtManager = new GTAVC.GXTManager(txtBoxGxtFilePath.Text, charDictionaryPath);
                         _loadedGxtType = gtxType;
                         return true;
                     }
@@ -135,6 +143,7 @@ namespace GTA_GXT_Editor.Forms
             btnAddEntry.Enabled = true;
             btnAddMissingEntries.Enabled = true;
             btnSaveChanges.Enabled = true;
+            btnConvertToOtherDict.Enabled = true;
         }
 
         private void ExecuteSearch()
@@ -200,6 +209,20 @@ namespace GTA_GXT_Editor.Forms
                 MessageBox.Show(this, $"Не удалось открыть '{Path.GetFileName(txtBoxGxtFilePath.Text)}'. Файл повреждён или не является совместимым.", "Ошибка открытия");
                 return GXTType.NONE;
             }
+        }
+
+        private string RequestCharsDictionary()
+        {
+            openFileDialog.Filter = $"Словарь шрифта (*.txt)|*.txt|Все файлы (*.*)|*.*";
+            openFileDialog.FileName = "";
+
+            var dialogResult = openFileDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                return openFileDialog.FileName;
+            }
+
+            return null;
         }
 
 
@@ -507,6 +530,60 @@ namespace GTA_GXT_Editor.Forms
 
                 MessageBox.Show(this, $"Было добавлено {missingEntries.Count} элементов.", "Опепация ");
             }
+        }
+
+        private void btnConvertToOtherDict_Click(object sender, EventArgs e)
+        {
+            // Получить путь к требуемому словарю
+            string targetCharDictionaryPath = RequestCharsDictionary();
+            if (string.IsNullOrEmpty(targetCharDictionaryPath))
+            {
+                MessageBox.Show("Путь к словарю символов не может быть пустым.");
+                return;
+            }
+
+            // Получить сами словари для дальнейшей работы
+            Dictionary<int[], char> mainCharsDictionary = gxtManager.CyryllicCharsDictionary;
+            Dictionary<int[], char> alternativeCharsDictionary = targetCharDictionaryPath.LoadCyryllicCharsDictionary();
+
+            if (mainCharsDictionary.Count != alternativeCharsDictionary.Count)
+            {
+                MessageBox.Show("Количество символов в оригинальном словаре и запрашиваемом отличается. Их количество должно совпадать.");
+                return;
+            }
+            if (!mainCharsDictionary.Select(p => p.Value).SequenceEqual(alternativeCharsDictionary.Select(p => p.Value)))
+            {
+                MessageBox.Show("Список символов в оригинальном словаре и запрашиваемом отличается. Они должны совпадать.");
+                return;
+            }
+
+            // Пройтись по всем записям GXT файла и для каждого байта записи заменить значение из оригинального словаря на значение из требуемого словаря
+            for (int gxtIndex = 0; gxtIndex < gxtManager.GXTEntries.Count; gxtIndex++)
+            {
+                foreach (KeyValuePair<int[], char> keyValuePair in mainCharsDictionary)
+                {
+                    byte[] processingBytes = gxtManager.GXTEntries[gxtIndex].Value;
+
+                    for (int byteIndex = 0; byteIndex < processingBytes.Length; byteIndex++)
+                    {
+                        if (processingBytes[byteIndex] == 0)
+                        {
+                            continue;
+                        }
+                        else if (keyValuePair.Key.Any(k => k == processingBytes[byteIndex]))
+                        {
+                            processingBytes[byteIndex] = (byte)alternativeCharsDictionary.First(p => p.Value == keyValuePair.Value).Key.First();
+                        }
+                    }
+                }
+            }
+
+            gxtManager.CyryllicCharsDictionaryPath = targetCharDictionaryPath;
+            gxtManager.ReloadCyryllicCharsDictionary();
+
+            LoadGXTDataToGUI();
+
+            MessageBox.Show("Конвертация успешно завершена.");
         }
     }
 
