@@ -36,6 +36,7 @@ namespace GTA_GXT_Editor.Forms
             this.btnEditEntry = new System.Windows.Forms.Button();
             this.btnAddEntry = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.chkLiveSearch = new System.Windows.Forms.CheckBox();
             this.chkLoopSearch = new System.Windows.Forms.CheckBox();
             this.btnNextSearch = new System.Windows.Forms.Button();
             this.chkCaseCheck = new System.Windows.Forms.CheckBox();
@@ -52,6 +53,7 @@ namespace GTA_GXT_Editor.Forms
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.btnAddMissingEntries = new System.Windows.Forms.Button();
             this.btnConvertToOtherDict = new System.Windows.Forms.Button();
+            this.btnReload = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -122,6 +124,7 @@ namespace GTA_GXT_Editor.Forms
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.chkLiveSearch);
             this.groupBox2.Controls.Add(this.chkLoopSearch);
             this.groupBox2.Controls.Add(this.btnNextSearch);
             this.groupBox2.Controls.Add(this.chkCaseCheck);
@@ -133,6 +136,17 @@ namespace GTA_GXT_Editor.Forms
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Поиск";
+            // 
+            // chkLiveSearch
+            // 
+            this.chkLiveSearch.AutoSize = true;
+            this.chkLiveSearch.Location = new System.Drawing.Point(136, 50);
+            this.chkLiveSearch.Name = "chkLiveSearch";
+            this.chkLiveSearch.Size = new System.Drawing.Size(98, 17);
+            this.chkLiveSearch.TabIndex = 8;
+            this.chkLiveSearch.Text = "\'Живой\' поиск";
+            this.chkLiveSearch.UseVisualStyleBackColor = true;
+            this.chkLiveSearch.CheckedChanged += new System.EventHandler(this.chkLiveSearch_CheckedChanged);
             // 
             // chkLoopSearch
             // 
@@ -297,11 +311,24 @@ namespace GTA_GXT_Editor.Forms
             this.btnConvertToOtherDict.UseVisualStyleBackColor = true;
             this.btnConvertToOtherDict.Click += new System.EventHandler(this.btnConvertToOtherDict_Click);
             // 
+            // btnReload
+            // 
+            this.btnReload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnReload.Enabled = false;
+            this.btnReload.Location = new System.Drawing.Point(534, 599);
+            this.btnReload.Name = "btnReload";
+            this.btnReload.Size = new System.Drawing.Size(168, 38);
+            this.btnReload.TabIndex = 12;
+            this.btnReload.Text = "Перезагрузить словарь/перевод";
+            this.btnReload.UseVisualStyleBackColor = true;
+            this.btnReload.Click += new System.EventHandler(this.btnReload_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(968, 649);
+            this.Controls.Add(this.btnReload);
             this.Controls.Add(this.btnConvertToOtherDict);
             this.Controls.Add(this.btnAddMissingEntries);
             this.Controls.Add(this.btnSelectGxtFilePath);
@@ -347,6 +374,8 @@ namespace GTA_GXT_Editor.Forms
         private System.Windows.Forms.CheckBox chkLoopSearch;
         private System.Windows.Forms.Button btnAddMissingEntries;
         private System.Windows.Forms.Button btnConvertToOtherDict;
+        private System.Windows.Forms.Button btnReload;
+        private System.Windows.Forms.CheckBox chkLiveSearch;
     }
 }
 

@@ -1,7 +1,6 @@
 ﻿using GTA_GXT_Editor.Common;
 using GTA_GXT_Editor.Utils;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace GTA_GXT_Editor.Contracts
@@ -71,7 +70,7 @@ namespace GTA_GXT_Editor.Contracts
 
             return targetBytes.ToArray();
         }
-    
+
         public void ReloadCyryllicCharsDictionary()
         {
             CyryllicCharsDictionary = CyryllicCharsDictionaryPath.LoadCyryllicCharsDictionary();

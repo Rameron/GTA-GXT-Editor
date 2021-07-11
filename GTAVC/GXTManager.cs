@@ -12,7 +12,7 @@ namespace GTA_GXT_Editor.GTAVC
 {
     public class GXTManager : CommonGXTManager
     {
-        private List<string> _emptyBlockKeySetsList = new List<string>();        
+        private List<string> _emptyBlockKeySetsList = new List<string>();
 
         private const string RUSSIAN_CHARS_FILENAME = "russian_chars_vc.txt";
 

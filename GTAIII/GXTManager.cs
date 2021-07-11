@@ -35,7 +35,7 @@ namespace GTA_GXT_Editor.GTAIII
             else
             {
                 _cyryllicCharsDictionary = CyryllicCharsDictionaryPath.LoadCyryllicCharsDictionary();
-            }           
+            }
             _gxtEntries = ReadGXTFile(gxtPath);
         }
 

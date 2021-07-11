@@ -52,7 +52,7 @@ namespace GTA_GXT_Editor.Forms
             cmbSearchColumn.SelectedIndex = 0;
         }
 
-        private bool InitGXTManager()
+        private bool InitGXTManager(bool noMessages = false)
         {
             btnAddEntry.Enabled = false;
             btnEditEntry.Enabled = false;
@@ -60,6 +60,7 @@ namespace GTA_GXT_Editor.Forms
             btnAddMissingEntries.Enabled = false;
             btnSaveChanges.Enabled = false;
             btnConvertToOtherDict.Enabled = false;
+            btnReload.Enabled = false;
 
             lstKeys.Items.Clear();
 
@@ -72,10 +73,20 @@ namespace GTA_GXT_Editor.Forms
                     var gtxType = DetectGxtType(txtBoxGxtFilePath.Text);
 
                     string charDictionaryPath = null;
-                    var dialogResult = MessageBox.Show(this, "Использовать встроенный словарь символов?", "Словарь символов", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (dialogResult == DialogResult.No)
+                    if (noMessages)
                     {
-                        charDictionaryPath = RequestCharsDictionary();
+                        charDictionaryPath = gxtManager.CyryllicCharsDictionaryPath;
+                    }
+                    else
+                    {
+                        var dialogResult = MessageBox.Show(this, "Использовать встроенный словарь символов?", "Словарь символов", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (dialogResult == DialogResult.No)
+                        {
+                            charDictionaryPath = RequestCharsDictionary();
+                        }
+
+                        // При загрузке нового файла индекс поиска сбрасывается
+                        _searchStartIndex = 0;
                     }
 
                     if (gtxType == GXTType.GTA_III)
@@ -144,19 +155,55 @@ namespace GTA_GXT_Editor.Forms
             btnAddMissingEntries.Enabled = true;
             btnSaveChanges.Enabled = true;
             btnConvertToOtherDict.Enabled = true;
+            btnReload.Enabled = true;
         }
 
-        private void ExecuteSearch()
+        private bool ExecuteSearch()
         {
+            if (lstKeys.Items.Count == 0)
+            {
+                return false;
+            }
+            
+            if (string.IsNullOrEmpty(txtSearchText.Text))
+            {
+                return false;
+            }
+
             List<ListViewItem> items = lstKeys.Items.Cast<ListViewItem>().ToList();
 
-            var searchIndex = items.FindIndex(_searchStartIndex, x => cmbSearchColumn.SelectedIndex == 0 ?
-                chkCaseCheck.Checked ?
-                    x.Text.Contains(txtSearchText.Text) :
-                    x.Text.ToLower().Contains(txtSearchText.Text.ToLower()) :
-                chkCaseCheck.Checked ?
-                    x.SubItems[cmbSearchColumn.SelectedIndex].Text.Contains(txtSearchText.Text) :
-                    x.SubItems[cmbSearchColumn.SelectedIndex].Text.ToLower().Contains(txtSearchText.Text.ToLower()));
+            string[] searchValues;
+            if (chkCaseCheck.Checked)
+            {
+                searchValues = GetStringCombinations(txtSearchText.Text);
+            }
+            else
+            {
+                searchValues = GetStringCombinations(txtSearchText.Text.ToLower()).Union(GetStringCombinations(txtSearchText.Text.ToUpper())).ToArray();
+            }
+
+            int searchIndex = -1;
+            for (int itemIndex = _searchStartIndex; itemIndex < lstKeys.Items.Count; itemIndex++)
+            {
+                string itemValue = cmbSearchColumn.SelectedIndex == 0 ? lstKeys.Items[itemIndex].Text : lstKeys.Items[itemIndex].SubItems[cmbSearchColumn.SelectedIndex].Text;
+
+                if (chkCaseCheck.Checked)
+                {
+                    if (searchValues.Any(x => itemValue.Contains(x)))
+                    {
+                        searchIndex = itemIndex;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (searchValues.Any(x => itemValue.ToLower().Contains(x)))
+                    {
+                        searchIndex = itemIndex;
+                        break;
+                    }
+                }
+            }
 
             if (searchIndex != -1)
             {
@@ -165,12 +212,85 @@ namespace GTA_GXT_Editor.Forms
                 lstKeys.Items[searchIndex].EnsureVisible();
 
                 _searchStartIndex = searchIndex;
+
+                return true;
             }
             else if (chkLoopSearch.Checked && _searchStartIndex != 0)
             {
                 _searchStartIndex = 0;
-                ExecuteSearch();
+                return ExecuteSearch();
             }
+
+            return false;
+        }
+
+        private string[] GetStringCombinations(string inputString)
+        {
+            List<KeyValuePair<char, char>> charVariations = GetVariations();
+
+            List<string> stringVariations = new List<string>();
+            stringVariations.Add(inputString);
+
+            foreach (KeyValuePair<char, char> pair in charVariations)
+            {
+                for (int i = 0; i < stringVariations.Count; i++)
+                {
+                    if (stringVariations[i].Contains(pair.Key))
+                    {
+                        string newVariation = stringVariations[i].Replace(pair.Key, pair.Value);
+
+                        if (!stringVariations.Contains(newVariation))
+                        {
+                            stringVariations.Add(newVariation);
+                        }
+                    }
+                    else if (stringVariations[i].Contains(pair.Value))
+                    {
+                        string newVariation = stringVariations[i].Replace(pair.Value, pair.Key);
+
+                        if (!stringVariations.Contains(newVariation))
+                        {
+                            stringVariations.Add(newVariation);
+                        }
+                    }
+                }
+            }
+
+            return stringVariations.ToArray();
+        }
+
+        private List<KeyValuePair<char, char>> GetVariations()
+        {
+            List<KeyValuePair<char, char>> charVariations = new List<KeyValuePair<char, char>>();
+
+            charVariations.Add(new KeyValuePair<char, char>('а', 'a'));
+            charVariations.Add(new KeyValuePair<char, char>('б', 'b'));
+            charVariations.Add(new KeyValuePair<char, char>('г', 'r'));
+            charVariations.Add(new KeyValuePair<char, char>('е', 'e'));
+            charVariations.Add(new KeyValuePair<char, char>('д', 'g'));
+            charVariations.Add(new KeyValuePair<char, char>('к', 'k'));
+            charVariations.Add(new KeyValuePair<char, char>('т', 'm'));
+            charVariations.Add(new KeyValuePair<char, char>('о', 'o'));
+            charVariations.Add(new KeyValuePair<char, char>('р', 'p'));
+            charVariations.Add(new KeyValuePair<char, char>('с', 'c'));
+            charVariations.Add(new KeyValuePair<char, char>('т', 't'));
+            charVariations.Add(new KeyValuePair<char, char>('у', 'y'));
+            charVariations.Add(new KeyValuePair<char, char>('х', 'x'));
+
+            charVariations.Add(new KeyValuePair<char, char>('А', 'A'));
+            charVariations.Add(new KeyValuePair<char, char>('В', 'B'));
+            charVariations.Add(new KeyValuePair<char, char>('С', 'C'));
+            charVariations.Add(new KeyValuePair<char, char>('Е', 'E'));
+            charVariations.Add(new KeyValuePair<char, char>('Н', 'H'));
+            charVariations.Add(new KeyValuePair<char, char>('К', 'K'));
+            charVariations.Add(new KeyValuePair<char, char>('М', 'M'));
+            charVariations.Add(new KeyValuePair<char, char>('О', 'O'));
+            charVariations.Add(new KeyValuePair<char, char>('Р', 'P'));
+            charVariations.Add(new KeyValuePair<char, char>('Т', 'T'));
+            charVariations.Add(new KeyValuePair<char, char>('Х', 'X'));
+            charVariations.Add(new KeyValuePair<char, char>('У', 'Y'));
+
+            return charVariations;
         }
 
         private GXTType DetectGxtType(string gtxPath)
@@ -226,32 +346,65 @@ namespace GTA_GXT_Editor.Forms
         }
 
 
+        private void chkLiveSearch_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkLiveSearch.Checked)
+            {
+                ExecuteSearch();
+            }
+        }
+
         private void txtSearchText_TextChanged(object sender, EventArgs e)
         {
-            _searchStartIndex = 0;
-            ExecuteSearch();
+            if (chkLiveSearch.Checked)
+            {
+                ExecuteSearch();
+            }
         }
 
         private void cmbSearchColumn_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ExecuteSearch();
+            if (chkLiveSearch.Checked)
+            {
+                ExecuteSearch();
+            }
         }
 
         private void btnNextSearch_Click(object sender, EventArgs e)
         {
+            // Осуществлять поиск следующего вхождения только при заполненном списке
             if (lstKeys.Items.Count == 0)
             {
                 return;
             }
 
-            _searchStartIndex++;
-            ExecuteSearch();
+            // Инкрементировать индекс поиска только в том случае, если он находится в границах списка
+            if (_searchStartIndex < lstKeys.Items.Count)
+            {
+                _searchStartIndex++;
+            }
+
+            // В противном случае, если включён циклический поиск, то перемещать индекс в самое начало
+            else if (chkLoopSearch.Checked)
+            {
+                _searchStartIndex = 0;
+            }
+
+            // Если поиск завершился неудачей и индекс не находится в начале списка - отменить его инкремент
+            if (!ExecuteSearch() && _searchStartIndex != 0)
+            {
+                _searchStartIndex--;
+            }
         }
 
         private void txtSearchText_KeyDown(object sender, KeyEventArgs e)
         {
-            btnNextSearch_Click(sender, e);
-        }
+            // Если нажат Enter, то выполнить поиск
+            if (e.KeyCode == Keys.Return)
+            {
+                ExecuteSearch();
+            }
+        }        
 
         private void lstKeys_ColumnClick(object sender, ColumnClickEventArgs e)
         {
@@ -437,6 +590,8 @@ namespace GTA_GXT_Editor.Forms
             {
                 btnEditEntry.Enabled = true;
                 btnDeleteEntry.Enabled = true;
+
+                _searchStartIndex = lstKeys.SelectedIndices[0];
             }
             else
             {
@@ -584,6 +739,28 @@ namespace GTA_GXT_Editor.Forms
             LoadGXTDataToGUI();
 
             MessageBox.Show("Конвертация успешно завершена.");
+        }
+
+        private void btnReload_Click(object sender, EventArgs e)
+        {
+            var scrollSpot = lstKeys.TopItem.Index;
+            var selectedIndex = -1;
+
+            if (lstKeys.SelectedItems.Count > 0)
+            {
+                selectedIndex = lstKeys.SelectedItems[0].Index;
+            }
+
+            if (InitGXTManager(true))
+            {
+                LoadGXTDataToGUI();
+            }
+
+            lstKeys.TopItem = lstKeys.Items[scrollSpot];
+            if (selectedIndex != -1)
+            {
+                lstKeys.Items[selectedIndex].Selected = true;
+            }
         }
     }
 
